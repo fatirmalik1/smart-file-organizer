@@ -90,7 +90,9 @@ def main():
     (PRISTINE / "IMG_4471").write_bytes(_jpeg_bytes((80, 80, 80)))
 
     # -- Tricky: no extension, genuinely unrecognizable / not valid text --
-    (PRISTINE / "mystery_file").write_bytes(bytes(range(256)) * 2)
+    # Invalid UTF-8 (stray continuation/never-valid bytes) so it fails a
+    # text decode, and no recognizable magic-byte signature either.
+    (PRISTINE / "mystery_file").write_bytes(bytes([0x80, 0x81, 0xfe, 0xff]) * 16)
 
     print(f"Wrote {len(list(PRISTINE.iterdir()))} fixture files to {PRISTINE}")
 
