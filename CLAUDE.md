@@ -22,3 +22,6 @@ Rules for working in this repository.
   `_needs_review/` path -- nothing about video/audio deep inspection, ML
   classifiers, or a UI redesign.
 - Plan before implementing.
+- `.mcp.json` (Jira MCP config) is never committed -- see `.mcp.json.example`
+  for the shape to copy from. `JIRA_API_TOKEN` is read from your shell
+  environment at launch, never written into the file itself.
