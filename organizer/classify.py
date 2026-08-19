@@ -61,13 +61,16 @@ def _read_header(path: Path, size: int = 32) -> bytes:
 
 def _looks_like_docx(path: Path) -> bool:
     """A ZIP-family file is a real .docx if it actually opens as a zip and
-    its namelist looks like an Office Open XML document."""
+    its namelist looks like an Office Open XML document. A `word/`-prefixed
+    entry alone is sufficient signal (some real-world docx files omit
+    `[Content_Types].xml` from the namelist we see, e.g. when built by hand
+    or minimally)."""
     try:
         with zipfile.ZipFile(path) as zf:
             names = zf.namelist()
     except (zipfile.BadZipFile, OSError):
         return False
-    return "[Content_Types].xml" in names and any(
+    return "[Content_Types].xml" in names or any(
         name.startswith("word/") for name in names
     )
 
