@@ -126,6 +126,23 @@ def test_real_plain_zip_with_misleading_extension_is_archive(tmp_path):
     assert classify(f) == "Archives"
 
 
+def test_docx_zip_with_only_word_entry_no_content_types_is_document(tmp_path):
+    """Regression guard for the project_plan.docx fixture layout exactly as
+    built by scripts/generate_fixtures.py's `_zip_bytes("word/document.xml",
+    ...)`: a real zip whose namelist contains ONLY `word/document.xml` and
+    no `[Content_Types].xml` entry at all. `_looks_like_docx()` previously
+    required both `[Content_Types].xml` AND a `word/`-prefixed entry, which
+    misclassified this exact fixture as Archives instead of Documents. The
+    fix loosened the check to `or`, so a `word/`-prefixed entry alone is
+    sufficient signal."""
+    f = tmp_path / "project_plan.docx"
+    with zipfile.ZipFile(f, "w") as zf:
+        zf.writestr("word/document.xml", "<xml>fake docx body</xml>")
+    names = zipfile.ZipFile(f).namelist()
+    assert "[Content_Types].xml" not in names
+    assert classify(f) == "Documents"
+
+
 def test_truncated_zip_bytes_with_docx_extension_still_documents(tmp_path):
     """Regression guard: the existing baseline behavior for a trusted
     extension paired with fake/truncated zip bytes (not a real zip, so
